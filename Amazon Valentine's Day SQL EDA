@@ -1,0 +1,250 @@
+--Create Table
+
+CREATE TABLE valentines (
+    title VARCHAR(1000) NOT NULL,
+    brand VARCHAR(1000),
+    description VARCHAR(10000),
+    three_star DECIMAL,
+    four_star DECIMAL,
+    five_star DECIMAL,
+    reviewsCount INT,
+    price INT,
+    price_currency VARCHAR(255),
+    price_value DECIMAL,
+    categoryPageData_productPosition INT);
+
+--Cleaning
+
+/* Dropping description column → 79% null
+
+ALTER TABLE valentines
+DROP COLUMN description;
+
+ALTER TABLE valentines
+DROP COLUMN price;
+
+/* Dropping price column → 100% null
+
+SELECT
+price_currency,
+COUNT(*) as currency_count
+FROM
+valentines
+GROUP BY
+price_currency;
+
+/* This tells us that there are 2 values in price_currency: null and $. We’re going to fill the null values with $.
+
+UPDATE
+valentines
+SET
+price_currency = '$'
+WHERE
+price_currency IS NULL;
+
+/* Tackle null values in price/value using mode
+
+
+SELECT
+price_value,
+COUNT(*) as price_count
+FROM
+valentines
+GROUP BY
+price_value
+ORDER BY price_count DESC;
+
+/* This tells us that there are 49 null values in this column. The most common (mode) value is 9.99 since there are 16 values that are 9.999.
+
+UPDATE
+valentines
+SET
+price_value = COALESCE(price_value, 9.99);
+
+/* Further analysis shows there’s products where the 3 types of reviews add up to 1.01. But this may be due to rounding.
+
+SELECT
+SUM(three_star + four_star + five_5star) as total_reviews,
+title
+FROM valentines
+GROUP BY title
+ORDER BY total_reviews DESC;
+
+--Review Rankings
+
+/* Products with Best Reviews
+
+SELECT
+title,
+five_5star,
+reviewscount
+FROM valentines
+ORDER BY five_5star DESC
+LIMIT 10;
+
+/* Products with Worst Reviews
+
+SELECT
+title,
+three_star,
+four_star,
+five_5star,
+reviewscount
+FROM valentines
+ORDER BY three_star DESC
+LIMIT 10;
+
+/* Brands with Best Reviews
+
+SELECT 
+brand,
+COUNT(title) as num_products,
+avg(three_star) as avg_three_rating,
+avg(four_star) as avg_four_rating,
+avg(five_5star) as avg_five_rating,
+sum(reviewscount) as total_reviews
+FROM
+valentines
+GROUP BY
+brand
+ORDER BY
+avg_five_rating DESC
+LIMIT 10;
+
+/* Brands with Worst Reviews
+
+SELECT 
+brand,
+avg(three_star) as avg_three_rating,
+avg(four_star) as avg_four_rating,
+avg(five_5star) as avg_five_rating,
+sum(reviewscount) as total_reviews
+FROM
+valentines
+GROUP BY
+brand
+ORDER BY
+avg_three_rating DESC
+LIMIT 10;
+
+--Bestseller List
+
+/* Let’s first look at the page ranking of products.
+
+SELECT 
+*
+FROM
+valentines
+ORDER BY categorypagedata_productposition
+LIMIT 20;
+
+SELECT 
+brand,
+count(title) as num_products,
+avg(categorypagedata_productposition) as avg_rank
+FROM
+valentines
+GROUP BY brand
+ORDER BY avg_rank ASC
+LIMIT 20;
+
+--Price vs Rating
+
+SELECT 
+avg(three_star) as avg_three,
+avg(four_star) as avg_four,
+avg(five_5star) as avg_five,
+sum(reviewscount) as total_reviews,
+price_value
+FROM
+valentines
+GROUP BY price_value
+ORDER BY price_value;
+
+/* This shows us that there are 82 different price “groups.”
+
+/* Most reviews?
+
+SELECT 
+avg(three_star) as avg_three,
+avg(four_star) as avg_four,
+avg(five_5star) as avg_five,
+sum(reviewscount) as total_reviews,
+price_value
+FROM
+valentines
+GROUP BY price_value
+ORDER BY total_reviews DESC
+LIMIT 5;
+
+/* $9.99 products are “most popular” in terms of reviews (which also hints at the number of purchases).
+
+/* Most 5 Star Ratings?
+
+SELECT 
+avg(three_star) as avg_three,
+avg(four_star) as avg_four,
+avg(five_5star) as avg_five,
+sum(reviewscount) as total_reviews,
+price_value
+FROM
+valentines
+GROUP BY price_value
+ORDER BY avg_five DESC
+LIMIT 5;
+
+/* Most 4 Star Ratings?
+
+SELECT 
+avg(three_star) as avg_three,
+avg(four_star) as avg_four,
+avg(five_5star) as avg_five,
+sum(reviewscount) as total_reviews,
+price_value
+FROM
+valentines
+GROUP BY price_value
+ORDER BY avg_four DESC
+LIMIT 5;
+
+/* In this case 4 stars is in the middle. It's better to think about 3 or 5, since these are more extreme.
+
+
+/* Most 3 Star Ratings?
+
+SELECT 
+avg(three_star) as avg_three,
+avg(four_star) as avg_four,
+avg(five_5star) as avg_five,
+sum(reviewscount) as total_reviews,
+price_value
+FROM
+valentines
+GROUP BY price_value
+ORDER BY avg_three DESC
+LIMIT 5;
+
+/* We see that in general, 3 star and 4 star ratings are less of the total reviews compared to five star ratings. This makes sense since this dataset contains the best sellers for Top Valentine’s Gifts.
+
+--Above Average Rating
+
+SELECT 
+avg(five_5star)
+FROM
+valentines;
+
+/* 0.768
+
+SELECT 
+title,
+five_5star
+FROM
+valentines
+WHERE five_5star >= 0.768
+ORDER BY
+five_5star DESC;
+
+/* 138 products
+
+
+
