@@ -4,6 +4,8 @@
 
 This exploratory data analysis project was suggested by Jess Ramos through her Substack.
 
+The goal of this exploratory data analysis project was to identify which products and brands have the best & worst reviews, what brands are on the bestseller list most often, if there are any trends between prices and ratings, and which products are above average for 5-star ratings based on Valentine’s Day shopping trends on Amazon.
+
 Dataset: [2024 Amazon Best Sellers: Top Valentine Gifts](https://www.kaggle.com/datasets/kanchana1990/2024-amazon-best-sellers-top-valentine-gifts?utm_source=substack&utm_medium=email)
 
 Using SQL, I pulled information from the dataset to identify answers to the following questions regarding Valentine’s Day shopping trends on Amazon:
